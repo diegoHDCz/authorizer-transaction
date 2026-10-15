@@ -46,4 +46,22 @@ class CardRepositoryTest {
         assertThatThrownBy(() -> cardRepository.saveAndFlush(Card.create(CARD_NUMBER, "9999", hasher)))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
+
+    @Test
+    void shouldFindCardForUpdateAndPersistTheDebit() {
+        cardRepository.saveAndFlush(Card.create(CARD_NUMBER, "1234", hasher));
+        entityManager.clear();
+
+        cardRepository.findByNumberForUpdate(CARD_NUMBER).orElseThrow().debit(new BigDecimal("10.00"));
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThat(cardRepository.findById(CARD_NUMBER).orElseThrow().getBalance())
+                .isEqualTo(new BigDecimal("490.00"));
+    }
+
+    @Test
+    void shouldReturnEmptyWhenFindingUnknownCardForUpdate() {
+        assertThat(cardRepository.findByNumberForUpdate(CARD_NUMBER)).isEmpty();
+    }
 }
