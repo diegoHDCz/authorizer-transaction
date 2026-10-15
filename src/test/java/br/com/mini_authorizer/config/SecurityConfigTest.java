@@ -42,7 +42,7 @@ class SecurityConfigTest {
                 .andExpect(jsonPath("$.status").value(401))
                 .andExpect(jsonPath("$.error").value("Unauthorized"))
                 .andExpect(jsonPath("$.message").value(
-                        "Autenticação obrigatória: informe usuário e senha via HTTP Basic."))
+                        "Authentication required: provide username and password via HTTP Basic."))
                 .andExpect(jsonPath("$.path").value("/cartoes/6549873025634501"))
                 .andExpect(jsonPath("$.timestamp").isNotEmpty());
     }
@@ -52,7 +52,7 @@ class SecurityConfigTest {
         mockMvc.perform(get("/cartoes/6549873025634501").with(httpBasic(VALID_USERNAME, "wrong")))
                 .andExpect(status().isUnauthorized())
                 .andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE, startsWith("Basic")))
-                .andExpect(jsonPath("$.message").value("Usuário ou senha inválidos."));
+                .andExpect(jsonPath("$.message").value("Invalid username or password."));
     }
 
     @Test
@@ -71,19 +71,19 @@ class SecurityConfigTest {
 
     @Test
     void shouldLetAuthenticatedGetReachTheApplication() throws Exception {
-        // Sem controller mapeado ainda, passar pela segurança significa receber 404 em vez de 401
+        // Unknown card: getting past security means the contract's 404 instead of 401
         mockMvc.perform(get("/cartoes/6549873025634501").with(httpBasic(VALID_USERNAME, VALID_PASSWORD)))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldLetAuthenticatedPostReachTheApplicationWithoutCsrfToken() throws Exception {
-        // API REST stateless: CSRF desabilitado, então POST autenticado não pode receber 403
+        // Stateless REST API: CSRF is disabled, so an authenticated POST must not get a 403
         mockMvc.perform(post("/cartoes")
                         .with(httpBasic(VALID_USERNAME, VALID_PASSWORD))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"numeroCartao\":\"6549873025634501\",\"senha\":\"1234\"}"))
-                .andExpect(status().isNotFound());
+                        .content("{\"cardNumber\":\"4000000000000002\",\"password\":\"1234\"}"))
+                .andExpect(status().isCreated());
     }
 
     @Test

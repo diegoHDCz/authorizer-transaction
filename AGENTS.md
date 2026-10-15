@@ -63,7 +63,8 @@ curl -u username:password -X POST localhost:8080/transacoes \
 Organização sugerida por responsabilidade, dentro de `br.com.mini_authorizer`:
 
 ```
-controller/   # endpoints REST, DTOs de entrada/saída (records), sem regra de negócio
+controller/   # endpoints REST, sem regra de negócio
+  dto/        # DTOs de request/response (records com sufixo DTO) - docs/patterns/dto.md
 service/      # casos de uso (criar cartão, consultar saldo, autorizar transação)
 domain/       # entidades e regras de autorização (Cartao, regras, exceções de negócio)
 repository/   # Spring Data
@@ -73,7 +74,8 @@ exception/    # @RestControllerAdvice mapeando exceções → status/corpo do co
 
 - Código (classes, métodos, variáveis) em inglês ou português, **mas consistente**; termos do contrato
   (`numeroCartao`, `CARTAO_INEXISTENTE`…)
-- DTOs como `record`; validação com Bean Validation quando fizer sentido.
+- DTOs como `record` em `controller/dto/`, com nome terminando em `DTO` (`CreateCardRequestDTO`,
+  `CardResponseDTO`); validação com Bean Validation. Padrão completo em [docs/patterns/dto.md](docs/patterns/dto.md).
 - Regras de autorização como objetos (ex.: cadeia/lista de regras), favorecendo polimorfismo — a solução é
   escrita **sem `if`** (sem `break`/`continue`). Preferir `Optional`, streams, enums com
   comportamento e exceções de domínio.
