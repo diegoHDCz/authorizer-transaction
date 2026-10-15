@@ -139,14 +139,14 @@ Erros que o contrato não define em detalhe usam um corpo JSON padrão (`ErrorRe
 
 ```mermaid
 flowchart LR
-    C[Cliente] --> S[Spring Security<br/>filtro HTTP Basic]
+    C["Cliente"] --> S["Spring Security<br/>filtro HTTP Basic"]
     S -->|401| H
-    S --> D[DispatcherServlet]
-    D --> V[Controller<br/>@Valid no DTO]
-    V -->|400| H[GlobalExceptionHandler<br/>@RestControllerAdvice]
-    V --> SV[Service<br/>@Transactional]
-    SV --> R[Repository<br/>Spring Data JPA]
-    R --> DB[(MySQL)]
+    S --> D["DispatcherServlet"]
+    D --> V["Controller<br/>@Valid no DTO"]
+    V -->|400| H["GlobalExceptionHandler<br/>@RestControllerAdvice"]
+    V --> SV["Service<br/>@Transactional"]
+    SV --> R["Repository<br/>Spring Data JPA"]
+    R --> DB[("MySQL")]
     SV -->|422 / 404| H
 ```
 
