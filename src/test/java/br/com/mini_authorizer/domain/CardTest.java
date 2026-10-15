@@ -42,4 +42,23 @@ class CardTest {
 
         assertThat(card.isNew()).isFalse();
     }
+
+    @Test
+    void shouldHaveBalanceForAmountUpToTheWholeBalance() {
+        Card card = Card.create("6549873025634501", "1234", hasher);
+
+        assertThat(card.hasBalanceFor(new BigDecimal("0.01"))).isTrue();
+        assertThat(card.hasBalanceFor(new BigDecimal("500.00"))).isTrue();
+        assertThat(card.hasBalanceFor(new BigDecimal("500.01"))).isFalse();
+    }
+
+    @Test
+    void shouldSubtractAmountFromBalanceKeepingScaleOfTwo() {
+        Card card = Card.create("6549873025634501", "1234", hasher);
+
+        card.debit(new BigDecimal("4.85"));
+        card.debit(BigDecimal.TEN);
+
+        assertThat(card.getBalance()).isEqualTo(new BigDecimal("485.15"));
+    }
 }
