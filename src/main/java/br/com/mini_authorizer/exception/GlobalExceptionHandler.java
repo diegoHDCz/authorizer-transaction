@@ -40,6 +40,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.notFound().build();
     }
 
+    /**
+     * Transaction contract: {@code 422} with the rule that barred it ({@code SALDO_INSUFICIENTE},
+     * {@code SENHA_INVALIDA} or {@code CARTAO_INEXISTENTE}) as a plain body.
+     */
+    @ExceptionHandler(TransactionRejectedException.class)
+    public ResponseEntity<String> handleTransactionRejected(TransactionRejectedException exception) {
+        return ResponseEntity.unprocessableContent().body(exception.getReason().name());
+    }
+
     @ExceptionHandler(InsufficientAuthenticationException.class)
     public ResponseEntity<ErrorResponseDTO> handleMissingCredentials(HttpServletRequest request) {
         return unauthorized(request, "Authentication required: provide username and password via HTTP Basic.");

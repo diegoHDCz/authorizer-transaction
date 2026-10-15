@@ -1,7 +1,10 @@
 package br.com.mini_authorizer.exception;
 
 import br.com.mini_authorizer.controller.dto.ErrorResponseDTO;
+import br.com.mini_authorizer.domain.RejectionReason;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +18,15 @@ class GlobalExceptionHandlerTest {
 
     private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
     private final MockHttpServletRequest request = new MockHttpServletRequest("GET", PATH);
+
+    @ParameterizedTest
+    @EnumSource(RejectionReason.class)
+    void shouldReturnUnprocessableEntityWithRejectionReasonAsBody(RejectionReason reason) {
+        ResponseEntity<String> response = handler.handleTransactionRejected(new TransactionRejectedException(reason));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT);
+        assertThat(response.getBody()).isEqualTo(reason.name());
+    }
 
     @Test
     void shouldAskForCredentialsWhenTheyAreMissing() {
