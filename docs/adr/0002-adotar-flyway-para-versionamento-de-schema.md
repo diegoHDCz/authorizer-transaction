@@ -1,6 +1,6 @@
 # ADR-0002: Adotar Flyway para versionamento de schema
 
-- **Status:** Aceito
+- **Status:** Substituído por [ADR-0004](0004-adotar-liquibase-para-versionamento-de-schema.md)
 - **Data:** 2026-10-15
 - **Relacionados:** [ADR-0001](0001-usar-mysql-para-persistencia.md)
 
