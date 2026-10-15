@@ -2,6 +2,7 @@
 
 Guia para agentes de IA (Claude Code, Codex, Copilot etc.) e pessoas que trabalham neste repositório.
 
+
 ## Visão geral
 
 Mini-autorizador de transações de cartões benefício.
@@ -48,7 +49,6 @@ curl -u username:password -X POST localhost:8080/transacoes \
 
 1. **Contratos da API são fixos.** URLs, métodos, status codes, nomes de campos JSON (`numeroCartao`, `senha`,
    `senhaCartao`, `valor`) e corpos de resposta (`OK`, `SALDO_INSUFICIENTE`, `SENHA_INVALIDA`, `CARTAO_INEXISTENTE`)
-   devem ser exatamente os do `README.md`.
 2. **Não alterar o serviço `mysql` declarado no `docker-compose.yml`.** O serviço `mongo` pode permanecer comentado.
 3. **Autenticação HTTP Basic** com `username` / `password` em todos os endpoints; sem credencial válida → `401`.
 4. **Persistir o cartão e o saldo.** A transação em si não precisa ser persistida.
@@ -56,7 +56,7 @@ curl -u username:password -X POST localhost:8080/transacoes \
    negativo nem perder débito. Resolver no banco (lock pessimista/otimista ou `UPDATE ... WHERE saldo >= valor`),
    nunca apenas com `synchronized` em memória.
 6. **Valores monetários** sempre em `BigDecimal` (nunca `double`/`float`), com escala 2.
-7. Toda suposição feita sobre requisitos ambíguos deve ser **documentada no `README.md`** (seção de decisões/suposições).
+
 
 ## Arquitetura e convenções
 
@@ -72,7 +72,7 @@ exception/    # @RestControllerAdvice mapeando exceções → status/corpo do co
 ```
 
 - Código (classes, métodos, variáveis) em inglês ou português, **mas consistente**; termos do contrato
-  (`numeroCartao`, `CARTAO_INEXISTENTE`…) ficam como no README.
+  (`numeroCartao`, `CARTAO_INEXISTENTE`…)
 - DTOs como `record`; validação com Bean Validation quando fizer sentido.
 - Regras de autorização como objetos (ex.: cadeia/lista de regras), favorecendo polimorfismo — a solução é
   escrita **sem `if`** (sem `break`/`continue`). Preferir `Optional`, streams, enums com
