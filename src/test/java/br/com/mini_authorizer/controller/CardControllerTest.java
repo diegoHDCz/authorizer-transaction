@@ -19,6 +19,8 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import java.math.BigDecimal;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -55,13 +57,16 @@ class CardControllerTest {
     }
 
     @Test
-    void shouldReturnUnprocessableEntityWithRequestDataWhenCardAlreadyExists() throws Exception {
+    void shouldReturnUnprocessableEntityWithErrorMessageWhenCardAlreadyExists() throws Exception {
         when(cardService.create(CARD_NUMBER, PASSWORD)).thenThrow(new CardAlreadyExistsException(CARD_NUMBER, PASSWORD));
 
         mockMvc.perform(createCard(BODY))
                 .andExpect(status().isUnprocessableContent())
-                .andExpect(jsonPath("$.cardNumber").value(CARD_NUMBER))
-                .andExpect(jsonPath("$.password").value(PASSWORD));
+                .andExpect(jsonPath("$.status").value(422))
+                .andExpect(jsonPath("$.error").value("Unprocessable Content"))
+                .andExpect(jsonPath("$.message").value("Card already exists: " + CARD_NUMBER))
+                .andExpect(jsonPath("$.path").value("/cartoes"))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
     }
 
     @Test
@@ -75,13 +80,13 @@ class CardControllerTest {
     }
 
     @Test
-    void shouldEchoRequestDataInEnglishWhenCardAlreadyExists() throws Exception {
+    void shouldNotExposePasswordWhenCardAlreadyExists() throws Exception {
         when(cardService.create(CARD_NUMBER, PASSWORD)).thenThrow(new CardAlreadyExistsException(CARD_NUMBER, PASSWORD));
 
         mockMvc.perform(createCard("{\"numeroCartao\":\"6549873025634501\",\"senha\":\"1234\"}"))
                 .andExpect(status().isUnprocessableContent())
-                .andExpect(jsonPath("$.cardNumber").value(CARD_NUMBER))
-                .andExpect(jsonPath("$.numeroCartao").doesNotExist());
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.senha").doesNotExist());
     }
 
     @ParameterizedTest
@@ -99,6 +104,33 @@ class CardControllerTest {
         // %s: password longer than the 72 bytes BCrypt can hash
         mockMvc.perform(createCard(body.formatted("1".repeat(73))))
                 .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(cardService);
+    }
+
+    @Test
+    void shouldTellWhichFieldsAreInvalidWithoutEchoingTheirValues() throws Exception {
+        mockMvc.perform(createCard("{\"numeroCartao\":\"{{numeroCartao}}\",\"senha\":\"\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Invalid request body."))
+                .andExpect(jsonPath("$.path").value("/cartoes"))
+                .andExpect(jsonPath("$.fields.length()").value(2))
+                .andExpect(jsonPath("$.fields[0].field").value("cardNumber"))
+                .andExpect(jsonPath("$.fields[0].message").isNotEmpty())
+                .andExpect(jsonPath("$.fields[1].field").value("password"))
+                .andExpect(jsonPath("$.fields[1].message").isNotEmpty())
+                .andExpect(jsonPath("$.trace").doesNotExist())
+                .andExpect(jsonPath("$.errors").doesNotExist())
+                .andExpect(content().string(not(containsString("{{numeroCartao}}"))));
+    }
+
+    @Test
+    void shouldReturnBadRequestWithReasonWhenBodyIsNotValidJson() throws Exception {
+        mockMvc.perform(createCard("{\"numeroCartao\":"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Malformed JSON request body or field with wrong type."))
+                .andExpect(jsonPath("$.fields").doesNotExist());
 
         verifyNoInteractions(cardService);
     }
