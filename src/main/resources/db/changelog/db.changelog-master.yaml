@@ -1,4 +1,4 @@
 databaseChangeLog:
   - include:
-      file: changes/001-create-cartao.sql
+      file: changes/001-create-card.sql
       relativeToChangelogFile: true

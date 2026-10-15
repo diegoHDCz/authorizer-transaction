@@ -7,3 +7,4 @@
 | 0002 | [Adotar Flyway para versionamento de schema](0002-adotar-flyway-para-versionamento-de-schema.md) | Substituído por 0004 | 2026-10-15 |
 | 0003 | [Arquitetura em camadas simples](0003-arquitetura-em-camadas-simples.md) | Aceito | 2026-10-15 |
 | 0004 | [Adotar Liquibase para versionamento de schema](0004-adotar-liquibase-para-versionamento-de-schema.md) | Aceito | 2026-10-15 |
+| 0005 | [Armazenar a senha do cartão com hash BCrypt](0005-armazenar-senha-do-cartao-com-bcrypt.md) | Aceito | 2026-10-15 |
