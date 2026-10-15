@@ -69,8 +69,8 @@ class CardIntegrationTest {
 
         mockMvc.perform(createCard("9999"))
                 .andExpect(status().isUnprocessableContent())
-                .andExpect(jsonPath("$.cardNumber").value(CARD_NUMBER))
-                .andExpect(jsonPath("$.password").value("9999"));
+                .andExpect(jsonPath("$.message").value("Card already exists: " + CARD_NUMBER))
+                .andExpect(jsonPath("$.password").doesNotExist());
 
         assertThat(cardRepository.findById(CARD_NUMBER).orElseThrow().getBalance())
                 .isEqualTo(new BigDecimal("500.00"));
