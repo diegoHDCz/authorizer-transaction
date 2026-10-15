@@ -1,5 +1,7 @@
 package br.com.mini_authorizer.exception;
 
+import br.com.mini_authorizer.controller.dto.CardResponseDTO;
+import br.com.mini_authorizer.controller.dto.ErrorResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -13,35 +15,49 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.Instant;
 
 /**
- * Ponto único de tradução de exceções para status e corpo HTTP.
+ * Single place that translates exceptions into HTTP status and body.
  * <p>
- * As exceções de autenticação nascem nos filtros do Spring Security e chegam aqui porque o
- * {@code AuthenticationEntryPoint} configurado em {@code SecurityConfig} as repassa ao
- * {@code HandlerExceptionResolver} do Spring MVC.
+ * Authentication exceptions are raised in the Spring Security filters and reach this class because the
+ * {@code AuthenticationEntryPoint} configured in {@code SecurityConfig} forwards them to Spring MVC's
+ * {@code HandlerExceptionResolver}.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final String BASIC_REALM = "Basic realm=\"mini-autorizador\"";
 
+    @ExceptionHandler(CardAlreadyExistsException.class)
+    public ResponseEntity<CardResponseDTO> handleCardAlreadyExists(CardAlreadyExistsException exception) {
+        return ResponseEntity.unprocessableContent()
+                .body(new CardResponseDTO(exception.getCardNumber(), exception.getPassword()));
+    }
+
+    /**
+     * Balance query contract: {@code 404} without a body.
+     */
+    @ExceptionHandler(CardNotFoundException.class)
+    public ResponseEntity<Void> handleCardNotFound() {
+        return ResponseEntity.notFound().build();
+    }
+
     @ExceptionHandler(InsufficientAuthenticationException.class)
-    public ResponseEntity<ErrorResponse> handleMissingCredentials(HttpServletRequest request) {
-        return unauthorized(request, "Autenticação obrigatória: informe usuário e senha via HTTP Basic.");
+    public ResponseEntity<ErrorResponseDTO> handleMissingCredentials(HttpServletRequest request) {
+        return unauthorized(request, "Authentication required: provide username and password via HTTP Basic.");
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorResponse> handleBadCredentials(HttpServletRequest request) {
-        return unauthorized(request, "Usuário ou senha inválidos.");
+    public ResponseEntity<ErrorResponseDTO> handleBadCredentials(HttpServletRequest request) {
+        return unauthorized(request, "Invalid username or password.");
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorResponse> handleAuthenticationFailure(HttpServletRequest request) {
-        return unauthorized(request, "Falha na autenticação.");
+    public ResponseEntity<ErrorResponseDTO> handleAuthenticationFailure(HttpServletRequest request) {
+        return unauthorized(request, "Authentication failed.");
     }
 
-    private ResponseEntity<ErrorResponse> unauthorized(HttpServletRequest request, String message) {
+    private ResponseEntity<ErrorResponseDTO> unauthorized(HttpServletRequest request, String message) {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
-        ErrorResponse body = new ErrorResponse(
+        ErrorResponseDTO body = new ErrorResponseDTO(
                 Instant.now(), status.value(), status.getReasonPhrase(), message, request.getRequestURI());
         return ResponseEntity.status(status)
                 .header(HttpHeaders.WWW_AUTHENTICATE, BASIC_REALM)

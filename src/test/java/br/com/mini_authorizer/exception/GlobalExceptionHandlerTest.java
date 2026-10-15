@@ -1,5 +1,6 @@
 package br.com.mini_authorizer.exception;
 
+import br.com.mini_authorizer.controller.dto.ErrorResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,26 +18,26 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void shouldAskForCredentialsWhenTheyAreMissing() {
-        ResponseEntity<ErrorResponse> response = handler.handleMissingCredentials(request);
+        ResponseEntity<ErrorResponseDTO> response = handler.handleMissingCredentials(request);
 
-        assertUnauthorized(response, "Autenticação obrigatória: informe usuário e senha via HTTP Basic.");
+        assertUnauthorized(response, "Authentication required: provide username and password via HTTP Basic.");
     }
 
     @Test
     void shouldReportInvalidCredentialsWhenUsernameOrPasswordIsWrong() {
-        ResponseEntity<ErrorResponse> response = handler.handleBadCredentials(request);
+        ResponseEntity<ErrorResponseDTO> response = handler.handleBadCredentials(request);
 
-        assertUnauthorized(response, "Usuário ou senha inválidos.");
+        assertUnauthorized(response, "Invalid username or password.");
     }
 
     @Test
     void shouldFallBackToGenericMessageForOtherAuthenticationFailures() {
-        ResponseEntity<ErrorResponse> response = handler.handleAuthenticationFailure(request);
+        ResponseEntity<ErrorResponseDTO> response = handler.handleAuthenticationFailure(request);
 
-        assertUnauthorized(response, "Falha na autenticação.");
+        assertUnauthorized(response, "Authentication failed.");
     }
 
-    private void assertUnauthorized(ResponseEntity<ErrorResponse> response, String expectedMessage) {
+    private void assertUnauthorized(ResponseEntity<ErrorResponseDTO> response, String expectedMessage) {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(response.getHeaders().getFirst(HttpHeaders.WWW_AUTHENTICATE))
                 .isEqualTo("Basic realm=\"mini-autorizador\"");

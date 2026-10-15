@@ -12,8 +12,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
- * HTTP Basic em todos os endpoints, conforme o contrato (login {@code username} / senha {@code password},
- * definidos em {@code spring.security.user.*}). API REST stateless: sem sessão e sem CSRF.
+ * HTTP Basic on every endpoint, as the contract requires (login {@code username} / password {@code password},
+ * defined in {@code spring.security.user.*}). Stateless REST API: no session and no CSRF.
  */
 @Configuration
 public class SecurityConfig {
@@ -25,18 +25,18 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Sem sessão, o forward para /error perderia a autenticação e viraria 401
+                        // Without a session, the forward to /error would lose the authentication and become a 401
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .anyRequest().authenticated())
-                // Credencial ausente (exceptionHandling) e credencial inválida (httpBasic) seguem o mesmo caminho
+                // Missing credentials (exceptionHandling) and invalid credentials (httpBasic) take the same path
                 .httpBasic(basic -> basic.authenticationEntryPoint(authenticationEntryPoint))
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(authenticationEntryPoint))
                 .build();
     }
 
     /**
-     * Exceções lançadas nos filtros não passam pelo {@code DispatcherServlet}; repassá-las ao
-     * {@link HandlerExceptionResolver} faz com que sejam tratadas pelo {@code @RestControllerAdvice}.
+     * Exceptions thrown in the filters never go through the {@code DispatcherServlet}; forwarding them to the
+     * {@link HandlerExceptionResolver} lets the {@code @RestControllerAdvice} handle them.
      */
     @Bean
     AuthenticationEntryPoint authenticationEntryPoint(
