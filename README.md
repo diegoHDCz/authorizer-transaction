@@ -65,11 +65,6 @@ curl -u username:password -X POST localhost:8080/transacoes \
   -d '{"numeroCartao":"6549873025634501","senhaCartao":"1234","valor":10.00}'
 ```
 
-O roteiro completo de uso também está pronto em:
-
-- `http/mini-autorizador.http` — HTTP Client do IntelliJ (ambiente `local`, "Run All Requests in File");
-- `docs/bruno/mini-autorizador.bruno.json` — coleção para o [Bruno](https://www.usebruno.com/).
-
 ## API
 
 ### Criar cartão — `POST /cartoes`
@@ -268,8 +263,8 @@ aplica o mesmo changelog no H2, o que valida o SQL e o mapeamento JPA a cada bui
 | Integração | `CardIntegrationTest`, `TransactionIntegrationTest` | Fluxo completo de ponta a ponta |
 | Concorrência | `TransactionIntegrationTest` | 20 débitos simultâneos de R$ 50,00 num cartão de R$ 500,00 → exatamente 10 `OK`, 10 `SALDO_INSUFICIENTE` e saldo 0 |
 
-O H2 não reproduz exatamente o isolamento do InnoDB; o comportamento contra o MySQL real é conferido pelo roteiro em
-`http/` ou `docs/bruno/`.
+O H2 não reproduz exatamente o isolamento do InnoDB; o comportamento contra o MySQL real é conferido
+manualmente com os comandos de [Testando na mão](#testando-na-mão).
 
 ## Estrutura do projeto
 
@@ -285,9 +280,7 @@ src/main/java/br/com/mini_authorizer/
 └── exception/     # exceções de negócio e GlobalExceptionHandler
 docs/
 ├── adr/           # decisões de arquitetura
-├── patterns/      # padrões de código
-└── bruno/         # coleção de requisições
-http/              # roteiro no HTTP Client do IntelliJ
+└── patterns/      # padrões de código
 ```
 
 O pacote base é `br.com.mini_authorizer` porque o hífen não é válido em nome de pacote Java.
