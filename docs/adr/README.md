@@ -8,3 +8,5 @@
 | 0003 | [Arquitetura em camadas simples](0003-arquitetura-em-camadas-simples.md) | Aceito | 2026-10-15 |
 | 0004 | [Adotar Liquibase para versionamento de schema](0004-adotar-liquibase-para-versionamento-de-schema.md) | Aceito | 2026-10-15 |
 | 0005 | [Armazenar a senha do cartão com hash BCrypt](0005-armazenar-senha-do-cartao-com-bcrypt.md) | Aceito | 2026-10-15 |
+| 0006 | [Autorizar transações com regras polimórficas e lock pessimista no cartão](0006-autorizar-transacoes-com-regras-e-lock-pessimista.md) | Aceito | 2026-10-15 |
+| 0007 | [Registrar todas as tentativas de transação na tabela `transactions` para auditoria](0007-registrar-tentativas-de-transacao-para-auditoria.md) | Aceito | 2026-10-15 |

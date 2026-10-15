@@ -63,6 +63,18 @@ public class Card implements Persistable<String> {
         return hasher.matches(rawPassword, password);
     }
 
+    public boolean hasBalanceFor(BigDecimal amount) {
+        return balance.compareTo(amount) >= 0;
+    }
+
+    /**
+     * Subtracts the amount from the balance. The authorization rules ({@code BalanceRule}) decide whether the
+     * debit is allowed; the caller must hold the row lock so the check and the debit see the same balance.
+     */
+    public void debit(BigDecimal amount) {
+        this.balance = balance.subtract(amount);
+    }
+
     @Override
     public String getId() {
         return number;
