@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(TransactionController.class)
@@ -86,6 +87,26 @@ class TransactionControllerTest {
     void shouldReturnBadRequestWithoutCallingServiceWhenPayloadIsInvalid(String body) throws Exception {
         mockMvc.perform(authorize(body))
                 .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(transactionService);
+    }
+
+    @Test
+    void shouldTellWhichFieldIsInvalidWhenAmountIsNotPositive() throws Exception {
+        mockMvc.perform(authorize("{\"numeroCartao\":\"6549873025634501\",\"senhaCartao\":\"1234\",\"valor\":-10.00}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fields.length()").value(1))
+                .andExpect(jsonPath("$.fields[0].field").value("amount"))
+                .andExpect(jsonPath("$.fields[0].message").isNotEmpty());
+
+        verifyNoInteractions(transactionService);
+    }
+
+    @Test
+    void shouldReturnBadRequestWithReasonWhenAmountHasWrongType() throws Exception {
+        mockMvc.perform(authorize("{\"numeroCartao\":\"6549873025634501\",\"senhaCartao\":\"1234\",\"valor\":\"abc\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Malformed JSON request body or field with wrong type."));
 
         verifyNoInteractions(transactionService);
     }
